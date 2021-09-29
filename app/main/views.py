@@ -1,39 +1,10 @@
-from flask import Flask,request,jsonify,make_response
-from flask_sqlalchemy import SQLAlchemy
+from . import app
+from flask import request,jsonify,make_response
+from werkzeug.security import generate_password_hash,check_password_hash
+from ..models import User,Blogpost,Comment
 import uuid
-from werkzeug.security import generate_password_hash, check_password_hash
+from .. import db
 
-app = Flask(__name__)
-
-app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://moringa:nancy@localhost/blogapp2'
-
-db = SQLAlchemy(app)
-
-class User(db.Model):
-    id=db.Column(db.Integer, primary_key=True)
-    public_id=db.Column(db.String(50), unique=True)
-    name = db.Column(db.String(50))
-    password = db.Column(db.String(255))
-    admin = db.Column(db.Boolean)
-    blog_posts = db.relationship('BlogPost', backref='user', lazy=True)
-    comment = db.relationship('Comment', backref='user', lazy=True)
-    
-class Blogpost(db.Model):
-    id=db.Column(db.Integer, primary_key=True)
-    title=db.Column(db.String(50))
-    author=db.Column(db.String(50))
-    content=db.Column(db.String(255))
-    user_id=db.Column(db.Integer,db.ForeignKey('user.id'))
-    
-class Comment(db.Model):
-    id=db.Column(db.Integer, primary_key=True)
-    comment=db.Column(db.String(255))
-    user_id=db.Column(db.Integer,db.ForeignKey('user.id'))
-    blogpost_id=db.Column(db.Integer,db.ForeignKey('blogpost.id'))
-    
-    
-    
 @app.route('/user', methods=['GET'])
 def get_user():
     users = User.query.all()
@@ -176,5 +147,3 @@ def create_comment():
     
     
     
-if __name__ == '__main__':
-    app.run(debug=True)
