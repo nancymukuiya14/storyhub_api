@@ -22,7 +22,7 @@ class Blogpost(db.Model):
     title=db.Column(db.String(50))
     author=db.Column(db.String(50))
     content=db.Column(db.String(255))
-    user_id=db.Column(db.Integer)
+    user_id=db.Column(db.Integer,db.ForeignKey('user.id'))
     
 @app.route('/user', methods=['GET'])
 def get_user():
@@ -62,15 +62,6 @@ def create_user():
     db.session.commit()
         
     return jsonify({'message' : 'New user created!'})
-@app.route('/user/<public_id>', methods=['PUT'])
-def promote_user(public_id):
-    user = User.query.filter_by(public_id=public_id).first()
-    if not user:
-        return jsonify({'message': 'No user found!'})
-    user.admin = True
-    db.session.commit()
-     
-    return jsonify({'message' : 'The user has been deleted!'})
 
 @app.route('/user/<public_id>', methods=['DELETE'])
 def delete_user(public_id):
@@ -79,7 +70,63 @@ def delete_user(public_id):
         return jsonify({'message': 'No user found!'})
     user.admin = True
     db.session.commit()
-    return ''
+    
+    return jsonify({'message':'The user has been deleted!'})
+
+#login
+
+
+#blogpost
+@app.route('/blogpost', methods=['GET'])
+def get_blogpost():
+    blogposts = Blogpost.query.all()
+    output = []
+    
+    for blogpost in blogposts:
+        blogpost_data = {}
+        blogpost_data['id'] = blogpost.id
+        blogpost_data['title'] = blogpost.title
+        blogpost_data['author'] = blogpost.author
+        blogpost_data['content'] = blogpost.content
+        blogpost_data['user_id'] = blogpost.user_id
+        output.append(blogpost_data)
+    return jsonify ({'blogposts': output}) 
+    
+@app.route('/blogpost/<int:id>', methods=['GET'])
+def get_one_blogpost(id):
+    blogpost = Blogpost.query.filter_by(id=id).first()
+    
+    if not blogpost:
+        return jsonify({'message': 'No blogpost found!'})
+    blogpost_data = {}
+    blogpost_data['id'] = blogpost.id
+    blogpost_data['title']= blogpost.title
+    blogpost_data['author'] = blogpost.author
+    blogpost_data['content'] = blogpost.content
+    blogpost_data['user_id'] = blogpost.user_id
+    
+    
+    return jsonify({'blogpost' : blogpost_data })
+
+@app.route('/blogpost', methods=['POST'])
+def create_blogpost():
+    data = request.get_json()
+    new_blogpost = Blogpost(title=data['title'],user_id=data['user_id'] ,author=data['author'],content=data['content'])
+    db.session.add(new_blogpost)
+    db.session.commit()
+        
+    return jsonify({'message' : 'New blogpost created!'})
+
+@app.route('/blogpost/<int:id>', methods=['DELETE'])
+def delete_blogpost(id):
+    blogpost = Blogpost.query.filter_by(id=id).first()
+    if not blogpost:
+        return jsonify({'message': 'No blogpost found!'})
+    db.session.delete(blogpost)
+    db.session.commit()
+    
+    return jsonify({'message':'The blogpost has been deleted!'})
+
 
 
 if __name__ == '__main__':
