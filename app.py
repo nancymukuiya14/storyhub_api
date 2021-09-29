@@ -1,4 +1,4 @@
-from flask import Flask,request,jsonify
+from flask import Flask,request,jsonify,make_response
 from flask_sqlalchemy import SQLAlchemy
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -75,6 +75,19 @@ def delete_user(public_id):
 
 #login
 
+@app.route('/login')     
+def login():
+    auth = request.authorization
+    if not auth or not auth.username or not auth.password:
+        return make_response('Could not verify', 401,{'WWW-Authenticate' : 'Basic realm = "Login required!"'})
+
+    user = User.query.filter_by(name = auth.username).first()  
+
+    if not user:
+        return jsonify({'message' : 'user not found!'})    
+    if check_password_hash(user.password , auth.password): 
+        return jsonify ({'message' : 'Login successful!'})
+    return jsonify({'message' : 'wrong password!'}) 
 
 #blogpost
 @app.route('/blogpost', methods=['GET'])
