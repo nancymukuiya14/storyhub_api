@@ -8,8 +8,8 @@ class User(db.Model , UserMixin):
     name = db.Column(db.String(50))
     password = db.Column(db.String(255))
     admin = db.Column(db.Boolean)
-    blog_posts = db.relationship('BlogPost', backref='user', lazy=True)
-    comment = db.relationship('Comment', backref='user', lazy=True)
+    blog_posts = db.relationship('Blogpost', backref='user', lazy=True)
+    comments = db.relationship('Comment', backref='user', lazy=True)
     
 class Blogpost(db.Model):
     __tablename__ = 'blogpost'
@@ -23,7 +23,6 @@ class Comment(db.Model):
     __tablename__ = 'comment'
     id=db.Column(db.Integer, primary_key=True)
     comment=db.Column(db.String(255))
-    user_id=db.Column(db.Integer,db.ForeignKey('user.id'))
-    blogpost_id=db.Column(db.Integer,db.ForeignKey('blogpost.id'))
+    user_id=db.Column(db.Integer,db.ForeignKey('user.id'),nullable=False)
     
     

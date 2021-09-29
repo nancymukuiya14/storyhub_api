@@ -131,17 +131,19 @@ def get_comment():
         comment_data['id'] = comment.id
         comment_data['comment'] = comment.comment
         comment_data['user_id'] = comment.user_id
-        comment_data['blogpost_id'] = comment.blogpost_id
         output.append(comment_data)
     return jsonify ({'comments': output}) 
-@app.route('/comment' , methods = ['POST'])
-def create_comment():
-    data = request.get_json()
-    new_comment = Comment(comment=data['comment'],user_id=data['user_id'] ,blogpost_id=data['blogpost_id'])
-    db.session.add(new_comment)
-    db.session.commit()
+@app.route('/user/<public_id>/blogpost/comment' , methods = ['POST'])
+def create_comment(public_id):
+    user = User.query.filter_by(public_id = public_id).first()
+    if user:
+        data = request.get_json()
+        new_comment = Comment(comment=data['comment'],user_id=data['user_id'])
+        db.session.add(new_comment)
+        db.session.commit()
         
-    return jsonify({'message' : 'New comment created!'})
+        return jsonify({'message' : 'New comment created!'})
+    return jsonify({'message' : 'No user found!'})
     
 
     
