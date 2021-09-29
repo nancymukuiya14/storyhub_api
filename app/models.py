@@ -11,6 +11,7 @@ class User(db.Model , UserMixin):
     blog_posts = db.relationship('Blogpost', backref='user', lazy=True)
     comments = db.relationship('Comment', backref='user', lazy=True)
     
+    
 class Blogpost(db.Model):
     __tablename__ = 'blogpost'
     id=db.Column(db.Integer, primary_key=True)
@@ -18,11 +19,13 @@ class Blogpost(db.Model):
     author=db.Column(db.String(50))
     content=db.Column(db.String(255))
     user_id=db.Column(db.Integer,db.ForeignKey('user.id'))
+    comments = db.relationship('Comment', backref='blogpost', lazy=True)
     
 class Comment(db.Model):
     __tablename__ = 'comment'
     id=db.Column(db.Integer, primary_key=True)
     comment=db.Column(db.String(255))
     user_id=db.Column(db.Integer,db.ForeignKey('user.id'),nullable=False)
+    post_id=db.Column(db.Integer,db.ForeignKey('blogpost.id'),nullable=False)
     
     

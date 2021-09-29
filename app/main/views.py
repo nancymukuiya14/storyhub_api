@@ -121,6 +121,8 @@ def delete_blogpost(id):
     
     return jsonify({'message':'The blogpost has been deleted!'})
 
+
+
 @app.route('/comment' , methods = ['GET'])
 def get_comment():
     comments = Comment.query.all()
@@ -131,19 +133,40 @@ def get_comment():
         comment_data['id'] = comment.id
         comment_data['comment'] = comment.comment
         comment_data['user_id'] = comment.user_id
+        comment_data['blogpost_id'] = comment.blogpost_id
         output.append(comment_data)
-    return jsonify ({'comments': output}) 
+    return jsonify ({'comments': output})
+
+@app.route('/comment/<int:post_id>' , methods = ['GET'])
+def get_blog_comments(post_id):
+    comments = Comment.query.filter_by(post_id=post_id).all()
+    output = []
+    
+    for comment in comments:
+        comment_data = {}
+        comment_data['id'] = comment.id
+        comment_data['comment'] = comment.comment
+        comment_data['user_id'] = comment.user_id
+        comment_data['post_id'] = comment.post_id
+        output.append(comment_data)
+    return jsonify ({'comments': output})
+
+
+
+
+
 @app.route('/user/<public_id>/blogpost/comment' , methods = ['POST'])
 def create_comment(public_id):
     user = User.query.filter_by(public_id = public_id).first()
     if user:
         data = request.get_json()
-        new_comment = Comment(comment=data['comment'],user_id=data['user_id'])
+        new_comment = Comment(comment=data['comment'],user_id=data['user_id'],post_id=data['post_id'])
         db.session.add(new_comment)
         db.session.commit()
         
         return jsonify({'message' : 'New comment created!'})
     return jsonify({'message' : 'No user found!'})
+
     
 
     
